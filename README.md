@@ -83,3 +83,23 @@ malicious/extreme flags are evaluator annotations. Honest inputs can use
 `k` and candidate count are clipped to available features. Raw client data for
 this chosen protocol are the required run input; no named external baseline or
 pretrained model is required.
+
+## Generate all inputs locally
+
+The selected input source is an analytic client-shift task. Two Gaussian causal
+features determine the binary label through the same noisy linear threshold in
+all clients. Other measurements have client-specific shifts and a class
+correlation that reverses on held-out clients. Their correlation is part of the
+generative data model; inference receives only feature columns. Whole clients
+belong to train or test. This is generated data, not measured client records.
+
+```bash
+python -m rccfedfs_data --output data/generated_clients.csv --train-clients 12 --test-clients 4 --samples-per-client 128 --features 20 --seed 13
+rccfedfs data/generated_clients.csv --data-source analytic_client_shift --output runs/generated --variant full --k 10 --candidates 20 --iterations 20 --grid 17 --attack mixed --attack-fraction 0.2 --seed 13
+```
+
+The generator writes the actual CSV consumed by rccfedfs and a small JSON input
+specification containing the seed, role counts and stable causal feature names.
+No normalization or selection uses test clients. No download or external weights
+are required. Training/selection and resulting metrics run only when the second
+command is invoked; no such result is bundled.

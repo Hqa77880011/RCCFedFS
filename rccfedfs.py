@@ -172,6 +172,7 @@ def select(records, args):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("data")
+    p.add_argument("--data-source", default="user_supplied")
     p.add_argument("--output", default="outputs/full")
     p.add_argument("--k", type=int, default=10)
     p.add_argument("--candidates", type=int, default=30)
@@ -217,7 +218,7 @@ def main():
     normalized_weight = weights * len(weights)
     future_records = summaries(future, features)
     covered = [np.linalg.norm(r["relevance"] - state["center"]) / np.sqrt(len(features)) <= state["radius"] for r in future_records]
-    metrics = dict(macro_f1=float(f1_score(future.label, predictions, average="macro", zero_division=0)), worst_client_macro_f1=min(s["macro_f1"] for s in scores), balanced_accuracy=float(balanced_accuracy_score(future.label, predictions)), attack_target_selection=float(np.isin(chosen, targets).mean()) if len(targets) else None, malicious_detection_auroc=float(roc_auc_score(malicious, -weights)) if len(np.unique(malicious)) == 2 else None, honest_extreme_fpr=float((normalized_weight[extreme] < args.credibility_cutoff).mean()) if extreme.any() else None, future_domain_coverage=float(np.mean(covered)), server_seconds=elapsed, upload_bytes=int(sum(sum(v.nbytes for v in r.values() if isinstance(v, np.ndarray)) + 16 for r in records)), radius=state["radius"], effective_support=state["support"])
+    metrics = dict(data_source=args.data_source, macro_f1=float(f1_score(future.label, predictions, average="macro", zero_division=0)), worst_client_macro_f1=min(s["macro_f1"] for s in scores), balanced_accuracy=float(balanced_accuracy_score(future.label, predictions)), attack_target_selection=float(np.isin(chosen, targets).mean()) if len(targets) else None, malicious_detection_auroc=float(roc_auc_score(malicious, -weights)) if len(np.unique(malicious)) == 2 else None, honest_extreme_fpr=float((normalized_weight[extreme] < args.credibility_cutoff).mean()) if extreme.any() else None, future_domain_coverage=float(np.mean(covered)), server_seconds=elapsed, upload_bytes=int(sum(sum(v.nbytes for v in r.values() if isinstance(v, np.ndarray)) + 16 for r in records)), radius=state["radius"], effective_support=state["support"])
     out = Path(args.output)
     out.mkdir(parents=True, exist_ok=True)
     (out / "metrics.json").write_text(json.dumps(metrics, indent=2))

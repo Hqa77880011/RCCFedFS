@@ -9,4 +9,4 @@ dependencies = ["numpy", "pandas", "scipy", "scikit-learn", "matplotlib"]
 [project.scripts]
 rccfedfs = "rccfedfs:main"
 [tool.setuptools]
-py-modules = ["rccfedfs"]
+py-modules = ["rccfedfs", "rccfedfs_data"]
