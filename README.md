@@ -62,3 +62,24 @@ This computes average pairwise subset Jaccard, mean/sample SD, paired Wilcoxon p
 ## Summary-space conventions
 
 Signed association is the strongest absolute one-versus-rest Pearson correlation; intervals use a sample-size-scaled approximation. Weighted medians provide robust centers, with weighted quantiles defining trimmed interval bounds. Redundancy is symmetrized and projected to a correlation matrix with nonnegative eigenvalues. Domain influence uses endpoint Hausdorff distance in normalized summary coordinates. Stress operators implement label-skew attenuation, redundancy-coupled nuisance shift and sensor association drift on a bounded grid. A single-feature shift satisfies the distance/sparsity budget; generated relevance is clipped to the trustworthy interval unless guards are disabled. These are summary stress configurations, not generated raw clients or physical interventions. Future-domain coverage in the output measures the declared relevance-space ball, separately from predictive utility.
+
+## Selected reproducible setting
+
+Use client-disjoint tabular classification, three or more training clients, raw
+numeric features, a training-fitted StandardScaler and logistic-regression readout.
+The finite summary-level stress operators are the chosen method: label skew,
+nuisance correlation and sensor drift; their names do not imply retraining a
+physical simulator. Full, uniform, no_influence, fixed_radius, no_guard and
+no_worst controls share the same feature panel and classifier protocol.
+
+```bash
+rccfedfs data/clients.csv --output runs/full --variant full --k 10 --candidates 30 --iterations 20 --trim 0.1 --radius-min 0.02 --radius-max 0.3 --alpha 0.5 --grid 17 --influence-weight 1 --redundancy-weight 0.2 --attack mixed --attack-fraction 0.2 --target-features 5 --seed 13
+```
+
+The CSV supplies `client,split,label` and at least two finite numeric feature
+columns (`split=train|test`, nonnegative integer shared-class labels). Optional
+malicious/extreme flags are evaluator annotations. Honest inputs can use
+`--attack none`; attack AUROC is then undefined if only one status is present.
+`k` and candidate count are clipped to available features. Raw client data for
+this chosen protocol are the required run input; no named external baseline or
+pretrained model is required.
